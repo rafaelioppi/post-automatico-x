@@ -15,6 +15,7 @@ const client = new TwitterApi({
 });
 
 const historicoPath = path.resolve('historico.json');
+const LIMITE_DIARIO = 17;
 
 const prompts = [
   'Escreva uma frase positiva sobre tecnologia.',
@@ -70,6 +71,12 @@ const prompts = [
   'Crie uma frase sobre como a tecnologia pode inspirar novas ideias.'
 ];
 
+function contarTweetsHoje() {
+  if (!fs.existsSync(historicoPath)) return 0;
+  const historico = JSON.parse(fs.readFileSync(historicoPath, 'utf-8'));
+  const hoje = new Date().toISOString().slice(0, 10);
+  return historico.filter(item => item.data.startsWith(hoje)).length;
+}
 
 async function gerarTextoComGemini() {
   const basePrompt = prompts[Math.floor(Math.random() * prompts.length)];
@@ -77,13 +84,7 @@ async function gerarTextoComGemini() {
 
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
   const body = {
-    contents: [
-      {
-        parts: [
-          { text: prompt }
-        ]
-      }
-    ]
+    contents: [{ parts: [{ text: prompt }] }]
   };
 
   try {
@@ -95,10 +96,8 @@ async function gerarTextoComGemini() {
 
     const result = await response.json();
     let texto = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-
     if (!texto) return null;
 
-    // Limpeza e reforço do limite
     texto = texto.replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
     return texto.length > 280 ? texto.slice(0, 277) + '…' : texto;
   } catch (error) {
@@ -106,8 +105,6 @@ async function gerarTextoComGemini() {
     return null;
   }
 }
-
-
 
 function salvarNoHistorico(texto, id) {
   const agora = new Date().toISOString();
@@ -123,6 +120,12 @@ function salvarNoHistorico(texto, id) {
 }
 
 async function executarTweetUnico() {
+  const enviadosHoje = contarTweetsHoje();
+  if (enviadosHoje >= LIMITE_DIARIO) {
+    console.log(`🚫 Limite diário de ${LIMITE_DIARIO} tweets atingido. Tente novamente amanhã.`);
+    return;
+  }
+
   const texto = await gerarTextoComGemini();
   if (!texto) return;
 
