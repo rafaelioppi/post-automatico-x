@@ -22,3 +22,59 @@ Texto: Aqui estão algumas opções, escolha a que melhor se encaixa no tom que 
 5.  "A impunidade na política brasileira é a maior prova de que as leis só valem para quem não as escreve."
 Imagem: imagem_splash.png
 Status: Erro ao postar: 403 Forbidden
+
+---
+Data: 2025-11-06 17:01:30
+Texto: Aqui estão algumas opções, em tom crítico e direto:
+
+1.  "A política brasileira não falha, ela saqueia. E o povo ainda aplaude."
+2.  "Na política brasileira, a única coisa que funciona perfeitamente é o sistema de auto-benefício e a reciclagem de velhas farsas."
+3.  "Não é crise política, é a confirmação de que o Brasil tem um câncer em Brasília que drena o futuro do país."
+4.  "A política brasileira: um circo de horrores onde os palhaços são eleitos para roubar o espetáculo e o público paga a conta com o próprio futuro."
+5.  "Continuar acreditando na política brasileira é a maior prova de masoquismo nacional."
+Imagem: imagem_splash.png
+Status: Erro ao postar: 403 Forbidden
+
+---
+Data: 2025-11-06 17:04:17
+Texto: Aqui estão algumas opções, com tons ligeiramente diferentes:
+
+1.  "Na política brasileira, a única coisa que muda são os nomes nos escândalos, não os escândalos em si."
+2.  "No Brasil, a democracia é um palco onde os atores mudam, mas a peça da impunidade segue em cartaz."
+3.  "A política brasileira: uma eterna disputa para ver quem melhor simula servir o povo enquanto serve a si mesmo."
+4.  "Cansados de eleger novos donos para a velha fazenda Brasil."
+5.  "A esperança na política brasileira é como um boleto: sempre chega, mas nunca é paga."
+Status: Erro ao postar: Consumer key must be string or bytes, not NoneType
+
+---
+Data: 2025-11-06 17:06:25
+Texto: Aqui estão algumas opções, em diferentes nuances de "provocativo":
+
+1.  **"No Brasil, a política não é sobre ideologia, é sobre quem rouba mais e com mais impunidade."**
+2.  **"Entre a esquerda e a direita, a única certeza na política brasileira é que o povo sempre paga a conta dos mesmos privilégios."**
+3.  **"A maior piada da política brasileira é acreditar que, desta vez, será diferente."**
+4.  **"O futuro do Brasil é refém de um passado de conchavos, e o presente é só o palco para o próximo espetáculo da hipocrisia."**
+5.  **"Votar no Brasil é trocar de ladrão, enquanto a nação continua refém do mesmo circo."**
+Status: Erro ao postar: Consumer key must be string or bytes, not NoneType
+
+---
+Data: 2025-11-06 17:07:22
+Texto: Aqui estão algumas opções, escolha a que mais te agrada:
+
+1.  "No Brasil, a política não tem ideologia; tem preço e impunidade garantida."
+2.  "A política brasileira: um circo de horrores onde o picadeiro muda, mas os palhaços são sempre os mesmos e a conta é nossa."
+3.  "Chega de 'futuro do Brasil': a política aqui é o presente que insiste em nos roubar."
+4.  "No Brasil, a política é a arte de iludir os otários enquanto a elite se refaz nas benesses do poder."
+5.  "Entre a corrupção explícita e a incompetência velada, a política brasileira nos lembra que a falência é o sistema, não um erro."
+Status: Erro ao postar: Consumer key must be string or bytes, not NoneType
+
+---
+Data: 2025-11-06 17:08:48
+Texto: Aqui estão algumas opções, em tom crítico e direto:
+
+1.  "Na política brasileira, a única coisa que muda é a cadeira; a impunidade, essa nunca sai do lugar."
+2.  "O problema da política brasileira não é estar quebrada, mas funcionar perfeitamente para quem a manipula."
+3.  "Brasil: onde a cada eleição, trocamos o nome do problema, mas a conta da impunidade continua a mesma."
+4.  "A política brasileira é um banquete para poucos, pago com o prato vazio da maioria."
+5.  "Entre escândalos e promessas, a única constante na política brasileira é a certeza de que a conta será sempre nossa."
+Status: Erro ao postar: Consumer key must be string or bytes, not NoneType

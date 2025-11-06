@@ -2,18 +2,22 @@ import os
 import tweepy
 from dotenv import load_dotenv
 
+# 🔄 Carregar variáveis do .env
 load_dotenv()
 
-auth = tweepy.OAuth1UserHandler(
-    os.getenv("CONSUMER_KEY"),
-    os.getenv("CONSUMER_SECRET"),
-    os.getenv("ACCESS_TOKEN"),
-    os.getenv("ACCESS_TOKEN_SECRET")
-)
-api = tweepy.API(auth)
+# 🔑 Bearer Token da API v2
+BEARER_TOKEN = os.getenv("BEARER_TOKEN")
 
+# 🐦 Inicializar cliente da API v2
+client = tweepy.Client(bearer_token=BEARER_TOKEN)
+
+# 📝 Texto de teste
+texto = "Teste simples via API v2 do X (Twitter)"
+
+# 🚀 Tentar postar
 try:
-    api.update_status("Teste simples via API")
-    print("✅ Tweet enviado com sucesso.")
+    response = client.create_tweet(text=texto)
+    print("✅ Tweet enviado com sucesso!")
+    print("🆔 ID do Tweet:", response.data["id"])
 except Exception as e:
     print("❌ Erro ao postar:", e)
