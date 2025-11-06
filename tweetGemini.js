@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 import { TwitterApi } from 'twitter-api-v2';
+import fetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';
-import fetch from 'node-fetch';
 
 dotenv.config();
 
@@ -18,13 +18,12 @@ const historicoPath = path.resolve('historico.json');
 
 async function gerarTextoComGemini() {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
   const body = {
     contents: [
       {
         parts: [
           {
-            text: 'Crie um tweet curto, criativo e positivo sobre tecnologia e inovação. Máximo 280 caracteres. Não ultrapasse esse limite.'
+            text: 'Crie um tweet curto, criativo e positivo sobre tecnologia e inovação. Máximo 280 caracteres. Não repita conteúdo.'
           }
         ]
       }
@@ -40,8 +39,7 @@ async function gerarTextoComGemini() {
 
     const result = await response.json();
     const texto = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    const tweetTexto = texto.length > 280 ? texto.slice(0, 277) + '…' : texto;
-    return tweetTexto;
+    return texto.length > 280 ? texto.slice(0, 277) + '…' : texto;
   } catch (error) {
     console.error('❌ Erro ao gerar texto com Gemini:', error);
     return null;
@@ -61,13 +59,10 @@ function salvarNoHistorico(texto, id) {
   fs.writeFileSync(historicoPath, JSON.stringify(historico, null, 2));
 }
 
-async function postarTweet() {
-  const texto = await gerarTextoComGemini();
-  if (!texto) return;
-
+async function postarTweet(texto) {
   try {
     const tweet = await client.v2.tweet(texto);
-    console.log('✅ Tweet enviado com sucesso! ID:', tweet.data.id);
+    console.log('✅ Tweet enviado:', tweet.data.id);
     salvarNoHistorico(texto, tweet.data.id);
   } catch (error) {
     console.error('❌ Erro ao postar:', error);
@@ -75,4 +70,12 @@ async function postarTweet() {
   }
 }
 
-postarTweet();
+async function executarBatch() {
+  for (let i = 0; i < 10; i++) {
+    const texto = await gerarTextoComGemini();
+    if (texto) await postarTweet(texto);
+    await new Promise(resolve => setTimeout(resolve, 3000)); // espera 3s entre tweets
+  }
+}
+
+executarBatch();
