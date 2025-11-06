@@ -59,7 +59,10 @@ function salvarNoHistorico(texto, id) {
   fs.writeFileSync(historicoPath, JSON.stringify(historico, null, 2));
 }
 
-async function postarTweet(texto) {
+async function executarTweetUnico() {
+  const texto = await gerarTextoComGemini();
+  if (!texto) return;
+
   try {
     const tweet = await client.v2.tweet(texto);
     console.log('✅ Tweet enviado:', tweet.data.id);
@@ -70,12 +73,4 @@ async function postarTweet(texto) {
   }
 }
 
-async function executarBatch() {
-  for (let i = 0; i < 10; i++) {
-    const texto = await gerarTextoComGemini();
-    if (texto) await postarTweet(texto);
-    await new Promise(resolve => setTimeout(resolve, 3000)); // espera 3s entre tweets
-  }
-}
-
-executarBatch();
+executarTweetUnico();
