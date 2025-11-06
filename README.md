@@ -1,28 +1,22 @@
-🐦 Postagem Automática de Tweets com Gemini
+# 🐦 Postagem Automática de Tweets com Gemini
+
 Este projeto automatiza a geração e publicação de tweets usando a API do Gemini (Google) e a API do X (Twitter), com agendamento diário via GitHub Actions. Ideal para perfis que desejam manter uma presença ativa com conteúdo criativo e positivo sobre tecnologia e inovação.
 
-🚀 Funcionalidades
-Geração automática de tweets com o Gemini
+---
 
-Publicação direta no X (Twitter)
+## 🚀 Funcionalidades
 
-Controle de limite diário (até 10 tweets por dia)
+- Geração automática de tweets com o Gemini
+- Publicação direta no X (Twitter)
+- Controle de limite diário (até 10 tweets por dia)
+- Histórico de tweets salvos localmente
+- Agendamento automático com GitHub Actions
 
-Histórico de tweets salvos localmente
+---
 
-Agendamento automático com GitHub Actions
+## 🧱 Estrutura do Projeto
 
-🧱 Estrutura do Projeto
-Código
-post-automatico-x/
-├── .env                      # Variáveis de ambiente (não subir para o GitHub)
-├── contador.json            # Contador de tweets por dia
-├── historico.json           # Histórico de tweets postados
-├── package.json             # Configuração do projeto Node.js
-├── tweetGemini.js           # Script principal
-└── .github/
-    └── workflows/
-        └── post-diario.yml  # Agendamento automático via GitHub Actions
+post-automatico-x/ ├── .env # Variáveis de ambiente (não subir para o GitHub) ├── contador.json # Contador de tweets por dia ├── historico.json # Histórico de tweets postados ├── package.json # Configuração do projeto Node.js ├── tweetGemini.js # Script principal └── .github/ └── workflows/ └── post-diario.yml # Agendamento automático via GitHub Actions
 ⚙️ Configuração
 1. Clone o repositório
 bash
