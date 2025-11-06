@@ -1,6 +1,6 @@
 import os
+import json
 import requests
-import google.generativeai as genai
 import tweepy
 from PIL import Image, ImageDraw, ImageFont
 from dotenv import load_dotenv
@@ -17,17 +17,38 @@ CONSUMER_SECRET = os.getenv("CONSUMER_SECRET")
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
 
-# 🧠 Gerar texto provocativo com Gemini
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-pro")
-response = model.generate_content("Crie uma frase provocativa sobre política brasileira em tom crítico e direto.")
-texto = response.text.strip()
+# 🧠 Gerar texto provocativo com Gemini 2.5 Flash via HTTP
+gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {GEMINI_API_KEY}"
+}
+payload = {
+    "contents": [
+        {
+            "parts": [
+                {
+                    "text": "Crie uma frase provocativa sobre política brasileira em tom crítico e direto."
+                }
+            ]
+        }
+    ]
+}
+
+response = requests.post(gemini_url, headers=headers, data=json.dumps(payload))
+response_json = response.json()
+
+try:
+    texto = response_json["candidates"][0]["content"]["parts"][0]["text"].strip()
+except (KeyError, IndexError):
+    texto = "Erro ao gerar texto com Gemini."
+
 print("📝 Texto gerado:", texto)
 
 # 🖼️ Buscar imagem no Unsplash
 query = "favela brasil urbana"
-url = f"https://api.unsplash.com/photos/random?query={query}&client_id={UNSPLASH_ACCESS_KEY}"
-img_response = requests.get(url).json()
+unsplash_url = f"https://api.unsplash.com/photos/random?query={query}&client_id={UNSPLASH_ACCESS_KEY}"
+img_response = requests.get(unsplash_url).json()
 img_url = img_response["urls"]["regular"]
 
 # ⬇️ Baixar imagem
