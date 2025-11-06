@@ -16,7 +16,21 @@ Este projeto automatiza a geração e publicação de tweets usando a API do Gem
 
 ## 🧱 Estrutura do Projeto
 
-post-automatico-x/ ├── .env # Variáveis de ambiente (não subir para o GitHub) ├── contador.json # Contador de tweets por dia ├── historico.json # Histórico de tweets postados ├── package.json # Configuração do projeto Node.js ├── tweetGemini.js # Script principal └── .github/ └── workflows/ └── post-diario.yml # Agendamento automático via GitHub Actions
+post-automatico-x/
+├── .env # Variáveis de ambiente (não subir para o GitHub)
+
+├── contador.json # Contador de tweets por dia 
+
+├── historico.json # Histórico de tweets postados 
+
+├── package.json # Configuração do projeto Node.js
+
+├── tweetGemini.js # Script principal
+
+└── .github/  └── workflows/ 
+
+└── post-diario.yml # Agendamento automático via GitHub Actions
+
 ⚙️ Configuração
 1. Clone o repositório
 bash
