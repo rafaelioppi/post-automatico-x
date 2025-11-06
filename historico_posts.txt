@@ -1,0 +1,12 @@
+
+---
+Data: 2025-11-06 16:42:23
+Texto: Erro ao gerar texto com Gemini.
+Imagem: imagem_splash.png
+Status: Erro ao postar: 403 Forbidden
+
+---
+Data: 2025-11-06 16:43:25
+Texto: Erro ao gerar texto com Gemini.
+Imagem: imagem_splash.png
+Status: Erro ao postar: 403 Forbidden
