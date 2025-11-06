@@ -72,7 +72,8 @@ const prompts = [
 
 
 async function gerarTextoComGemini() {
-  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+  const basePrompt = prompts[Math.floor(Math.random() * prompts.length)];
+  const prompt = `${basePrompt} Certifique-se de que a frase tenha no máximo 280 caracteres.`;
 
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
   const body = {
@@ -97,16 +98,15 @@ async function gerarTextoComGemini() {
 
     if (!texto) return null;
 
-    // Remove quebras de linha e espaços duplicados
+    // Limpeza e reforço do limite
     texto = texto.replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
-
-    // Limita a 280 caracteres com reticências se necessário
     return texto.length > 280 ? texto.slice(0, 277) + '…' : texto;
   } catch (error) {
     console.error('❌ Erro ao gerar texto com Gemini:', error);
     return null;
   }
 }
+
 
 
 function salvarNoHistorico(texto, id) {
