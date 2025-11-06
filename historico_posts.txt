@@ -89,3 +89,14 @@ Texto: Aqui estão algumas opções, escolha a que mais se alinha com o que voc�
 4.  "Enquanto o povo sonha com mudanças, a política brasileira assegura a impunidade e o privilégio dos mesmos de sempre."
 5.  "O Brasil não tem crise de representação, tem crise de vergonha na cara de quem nos representa."
 Status: Erro ao postar: Consumer key must be string or bytes, not NoneType
+
+---
+Data: 2025-11-06 17:19:32
+Texto: Aqui estão algumas opções, em tom crítico e direto:
+
+1.  **"Na política brasileira, a cada eleição muda o figurino, mas o roteiro da farsa e os protagonistas da impunidade permanecem os mesmos."**
+2.  **"O maior imposto do Brasil não é o que você paga, mas o que os políticos cobram da sua esperança e do seu futuro."**
+3.  **"A política brasileira não falha; ela cumpre à risca o seu papel de proteger os interesses de quem está no poder, não de quem o concede."**
+
+Qual delas prefere ou se aproxima mais do que você busca?
+Status: Erro ao postar: Consumer key must be string or bytes, not NoneType
