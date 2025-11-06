@@ -47,6 +47,7 @@ CONSUMER_SECRET=...
 ACCESS_TOKEN=...
 ACCESS_TOKEN_SECRET=...
 4. Configure os Secrets no GitHub
+   
 Vá em Settings > Secrets and variables > Actions > Secrets e adicione:
 
 GEMINI_API_KEY
@@ -60,6 +61,7 @@ ACCESS_TOKEN
 ACCESS_TOKEN_SECRET
 
 🕒 Agendamento automático
+
 O workflow post-diario.yml está configurado para rodar 10 vezes por dia, postando 1 tweet por execução:
 
 yaml
@@ -68,6 +70,7 @@ cron:
   - '0 14 * * *'  # 11:00
   ...
   - '0 22 * * *'  # 19:00
+  - 
 Você também pode executar manualmente via GitHub Actions.
 
 📜 Histórico e Limite Diário
@@ -80,5 +83,6 @@ Todos os tweets enviados são registrados em historico.json.
 🧪 Teste local
 bash
 node tweetGemini.js
+
 📄 Licença
 Este projeto é de uso pessoal. Sinta-se livre para adaptar e expandir conforme necessário.
