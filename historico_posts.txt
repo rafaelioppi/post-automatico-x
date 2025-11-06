@@ -78,3 +78,14 @@ Texto: Aqui estão algumas opções, em tom crítico e direto:
 4.  "A política brasileira é um banquete para poucos, pago com o prato vazio da maioria."
 5.  "Entre escândalos e promessas, a única constante na política brasileira é a certeza de que a conta será sempre nossa."
 Status: Erro ao postar: Consumer key must be string or bytes, not NoneType
+
+---
+Data: 2025-11-06 17:13:04
+Texto: Aqui estão algumas opções, escolha a que mais se alinha com o que você busca:
+
+1.  "Na política brasileira, a única coisa que realmente funciona é a engrenagem da impunidade."
+2.  "Muda o governo, mas a roubalheira e o privilégio continuam sendo a verdadeira constituição do Brasil."
+3.  "A política brasileira: um circo de horrores onde o povo paga o ingresso para aplaudir seus próprios algozes."
+4.  "Enquanto o povo sonha com mudanças, a política brasileira assegura a impunidade e o privilégio dos mesmos de sempre."
+5.  "O Brasil não tem crise de representação, tem crise de vergonha na cara de quem nos representa."
+Status: Erro ao postar: Consumer key must be string or bytes, not NoneType
