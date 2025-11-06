@@ -40,12 +40,17 @@ cd post-automatico-x
 bash
 npm install
 3. Crie o arquivo .env com suas chaves:
-env
+
 GEMINI_API_KEY=...
+
 CONSUMER_KEY=...
+
 CONSUMER_SECRET=...
+
 ACCESS_TOKEN=...
+
 ACCESS_TOKEN_SECRET=...
+
 4. Configure os Secrets no GitHub
    
 Vá em Settings > Secrets and variables > Actions > Secrets e adicione:
