@@ -16,15 +16,28 @@ const client = new TwitterApi({
 
 const historicoPath = path.resolve('historico.json');
 
+const prompts = [
+  'Crie um tweet curto, criativo e positivo sobre tecnologia e inovação. Máximo 280 caracteres.',
+  'Escreva um tweet inspirador sobre o impacto positivo da inteligência artificial no nosso dia a dia.',
+  'Gere um tweet otimista sobre como o futuro digital pode transformar a forma como vivemos e trabalhamos.',
+  'Crie um tweet motivacional sobre como a automação pode aumentar a produtividade e liberar tempo para criatividade.',
+  'Escreva um tweet curto sobre a importância de aprender algo novo todos os dias no mundo da tecnologia.',
+  'Crie um tweet positivo sobre como proteger sua privacidade e dados no mundo conectado.',
+  'Gere um tweet sobre como a tecnologia pode ajudar a construir um futuro mais sustentável.',
+  'Escreva um tweet criativo sobre o poder de criar, prototipar e compartilhar ideias com a cultura maker.',
+  'Crie um tweet sobre como os dispositivos móveis estão mudando a forma como nos conectamos e vivemos.',
+  'Gere um tweet inspirador sobre como a ciência e a tecnologia caminham juntas para transformar o mundo.'
+];
+
 async function gerarTextoComGemini() {
+  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
   const body = {
     contents: [
       {
         parts: [
-          {
-            text: 'Crie um tweet curto, criativo e positivo sobre tecnologia e inovação. Máximo 280 caracteres. Não repita conteúdo.'
-          }
+          { text: prompt }
         ]
       }
     ]
@@ -39,7 +52,7 @@ async function gerarTextoComGemini() {
 
     const result = await response.json();
     const texto = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    return texto.length > 280 ? texto.slice(0, 277) + '…' : texto;
+    return texto?.length > 280 ? texto.slice(0, 277) + '…' : texto;
   } catch (error) {
     console.error('❌ Erro ao gerar texto com Gemini:', error);
     return null;
