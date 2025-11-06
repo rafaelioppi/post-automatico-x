@@ -1,0 +1,34 @@
+```
+# Sistema / editor
+.DS_Store
+.vscode/
+.idea/
+# Dependências
+node_modules/
+vendor/
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+# Build / dist
+dist/
+build/
+coverage/
+*.egg
+# Logs
+*.log
+# Docker
+docker-compose.override.yml
+# OS
+*.swp
+# Environment
+.env.local
+.env.*.local
+# Devcontainer
+.devcontainer/
+# Outros
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+```
