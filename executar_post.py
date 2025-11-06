@@ -17,13 +17,11 @@ CONSUMER_SECRET = os.getenv("CONSUMER_SECRET")
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
 
-# 🔬 Gerar texto com Gemini 2.5 Flash via HTTP
+# 🔬 Gerar texto com Gemini 2.5 Flash via HTTP (usando ?key=... corretamente)
 def gerar_texto_com_gemini(prompt):
     url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {GEMINI_API_KEY}"
-    }
+    params = { "key": GEMINI_API_KEY }
+    headers = { "Content-Type": "application/json" }
     payload = {
         "contents": [
             {
@@ -36,7 +34,7 @@ def gerar_texto_com_gemini(prompt):
     }
 
     try:
-        resposta = requests.post(url, headers=headers, data=json.dumps(payload))
+        resposta = requests.post(url, headers=headers, params=params, data=json.dumps(payload))
         resposta.raise_for_status()
         data = resposta.json()
         texto = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")

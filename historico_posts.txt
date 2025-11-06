@@ -10,3 +10,15 @@ Data: 2025-11-06 16:43:25
 Texto: Erro ao gerar texto com Gemini.
 Imagem: imagem_splash.png
 Status: Erro ao postar: 403 Forbidden
+
+---
+Data: 2025-11-06 16:49:41
+Texto: Aqui estão algumas opções, escolha a que melhor se encaixa no tom que você procura:
+
+1.  "Na política brasileira, a corrupção não é um desvio, mas a regra do jogo — e o eleitor, o maior financiador involuntário."
+2.  "Cansado de promessas vazias? Na política brasileira, o eco da sua revolta é o lucro deles."
+3.  "A maior farsa da política brasileira é convencer o povo de que há escolhas, quando o roteiro já está escrito pelos mesmos de sempre."
+4.  "No Brasil, o crime compensa... especialmente quando é de colarinho branco e com foro privilegiado."
+5.  "A impunidade na política brasileira é a maior prova de que as leis só valem para quem não as escreve."
+Imagem: imagem_splash.png
+Status: Erro ao postar: 403 Forbidden
