@@ -93,13 +93,21 @@ async function gerarTextoComGemini() {
     });
 
     const result = await response.json();
-    const texto = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    return texto?.length > 280 ? texto.slice(0, 277) + '…' : texto;
+    let texto = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+    if (!texto) return null;
+
+    // Remove quebras de linha e espaços duplicados
+    texto = texto.replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
+
+    // Limita a 280 caracteres com reticências se necessário
+    return texto.length > 280 ? texto.slice(0, 277) + '…' : texto;
   } catch (error) {
     console.error('❌ Erro ao gerar texto com Gemini:', error);
     return null;
   }
 }
+
 
 function salvarNoHistorico(texto, id) {
   const agora = new Date().toISOString();
