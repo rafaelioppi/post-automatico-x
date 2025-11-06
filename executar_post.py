@@ -17,32 +17,38 @@ CONSUMER_SECRET = os.getenv("CONSUMER_SECRET")
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
 
-# 🧠 Gerar texto provocativo com Gemini 2.5 Flash via HTTP
-gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
-headers = {
-    "Content-Type": "application/json",
-    "Authorization": f"Bearer {GEMINI_API_KEY}"
-}
-payload = {
-    "contents": [
-        {
-            "parts": [
-                {
-                    "text": "Crie uma frase provocativa sobre política brasileira em tom crítico e direto."
-                }
-            ]
-        }
-    ]
-}
+# 🔬 Gerar texto com Gemini 2.5 Flash via HTTP
+def gerar_texto_com_gemini(prompt):
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {GEMINI_API_KEY}"
+    }
+    payload = {
+        "contents": [
+            {
+                "role": "user",
+                "parts": [
+                    {"text": prompt}
+                ]
+            }
+        ]
+    }
 
-response = requests.post(gemini_url, headers=headers, data=json.dumps(payload))
-response_json = response.json()
+    try:
+        resposta = requests.post(url, headers=headers, data=json.dumps(payload))
+        resposta.raise_for_status()
+        data = resposta.json()
+        texto = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+        if texto.strip():
+            return texto.strip()
+    except Exception as err:
+        print("❌ Erro ao gerar texto com Gemini:", err)
+    return "Erro ao gerar texto com Gemini."
 
-try:
-    texto = response_json["candidates"][0]["content"]["parts"][0]["text"].strip()
-except (KeyError, IndexError):
-    texto = "Erro ao gerar texto com Gemini."
-
+# 🧠 Gerar frase provocativa
+prompt = "Crie uma frase provocativa sobre política brasileira em tom crítico e direto."
+texto = gerar_texto_com_gemini(prompt)
 print("📝 Texto gerado:", texto)
 
 # 🖼️ Buscar imagem no Unsplash
@@ -74,11 +80,16 @@ print("🖼️ Imagem criada com texto.")
 auth = tweepy.OAuth1UserHandler(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
-media = api.media_upload("imagem_splash.png")
-api.update_status(status=texto, media_ids=[media.media_id])
-print("🚀 Tweet publicado com sucesso!")
+try:
+    media = api.media_upload("imagem_splash.png")
+    api.update_status(status=texto, media_ids=[media.media_id])
+    print("🚀 Tweet publicado com sucesso!")
+    status = "Publicado com sucesso"
+except Exception as e:
+    print("❌ Erro ao postar no X:", e)
+    status = f"Erro ao postar: {e}"
 
 # 🕒 Salvar histórico
 agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 with open("historico_posts.txt", "a", encoding="utf-8") as f:
-    f.write(f"\n---\nData: {agora}\nTexto: {texto}\nImagem: imagem_splash.png\nStatus: Publicado com sucesso\n")
+    f.write(f"\n---\nData: {agora}\nTexto: {texto}\nImagem: imagem_splash.png\nStatus: {status}\n")
