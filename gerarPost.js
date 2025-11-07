@@ -235,7 +235,7 @@ async function executarTweetUnico() {
     if (error.code === 429 || error?.data?.status === 429) {
       const resetTimestamp = error?.rateLimit?.day?.reset;
       if (resetTimestamp) {
-        const resetDate = new Date(resetTimestamp * 1000).toISOString();
+        const resetDate = new Date(resetTimestamp * 1000).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
         console.log(`⏳ Limite diário atingido. Novo envio permitido após: ${resetDate}`);
       } else {
         console.log('⏳ Limite diário atingido. Aguarde o reset da API.');
