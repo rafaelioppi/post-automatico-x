@@ -224,12 +224,19 @@ async function executarTweetUnico() {
   const texto = await gerarTextoComGemini();
   if (!texto) return;
 
-  try {
+ try {
     const tweet = await client.v2.tweet(texto);
     console.log('✅ Tweet enviado:', tweet.data.id);
     salvarNoHistorico(texto, tweet.data.id);
   } catch (error) {
     console.error('❌ Erro ao postar:', error);
+
+    // ✅ Verificação extra para erro de limite excedido
+    if (error.code === 429 || error?.data?.status === 429) {
+      console.log('🚫 Limite de requisições atingido pela API. Aguarde o reset antes de tentar novamente.');
+      return;
+    }
+
     if (error.data) console.error('🔍 Detalhes do erro:', error.data);
   }
 }
