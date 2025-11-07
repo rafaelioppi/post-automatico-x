@@ -233,7 +233,13 @@ async function executarTweetUnico() {
 
     // ✅ Verificação extra para erro de limite excedido
     if (error.code === 429 || error?.data?.status === 429) {
-      console.log('🚫 Limite de requisições atingido pela API. Aguarde o reset antes de tentar novamente.');
+      const resetTimestamp = error?.rateLimit?.day?.reset;
+      if (resetTimestamp) {
+        const resetDate = new Date(resetTimestamp * 1000).toISOString();
+        console.log(`⏳ Limite diário atingido. Novo envio permitido após: ${resetDate}`);
+      } else {
+        console.log('⏳ Limite diário atingido. Aguarde o reset da API.');
+      }
       return;
     }
 
