@@ -6,7 +6,7 @@ import path from 'path';
 
 dotenv.config();
 
-// Configurações
+// 🔐 Configurações de autenticação
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const twitter = new TwitterApi({
   appKey: process.env.CONSUMER_KEY,
@@ -24,13 +24,13 @@ const assuntos = [
   'história', 'ciência', 'cultura', 'esporte', 'gastronomia', 'autoconhecimento'
 ];
 
-// Gera prompt dinâmico para frases inspiradoras
+// 🎯 Gera prompt dinâmico para frases inspiradoras
 function gerarPromptDinamico() {
   const assunto = assuntos[Math.floor(Math.random() * assuntos.length)];
   return `Crie uma frase interessante, positiva e inspiradora para postar no X (Use emojis e hashtags) com no máximo 344 caracteres sobre ${assunto}. A sua resposta deve ser exatamente o post que será publicado.`;
 }
 
-// Conta tweets enviados hoje
+// 📊 Conta tweets enviados hoje
 function contarTweetsHoje() {
   if (!fs.existsSync(historicoPath)) return 0;
   const historico = JSON.parse(fs.readFileSync(historicoPath, 'utf-8'));
@@ -38,14 +38,14 @@ function contarTweetsHoje() {
   return historico.filter(item => item.data.startsWith(hoje)).length;
 }
 
-// Conta total de tweets enviados
+// 📈 Conta total de tweets enviados
 function contarTotalDeTweets() {
   if (!fs.existsSync(historicoPath)) return 0;
   const historico = JSON.parse(fs.readFileSync(historicoPath, 'utf-8'));
   return historico.length;
 }
 
-// Gera texto com Gemini com até 344 caracteres
+// 🤖 Gera texto com Gemini com até 344 caracteres
 async function gerarTextoComGemini(prompt) {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
   const body = { contents: [{ parts: [{ text: prompt }] }] };
@@ -75,7 +75,7 @@ async function gerarTextoComGemini(prompt) {
   }
 }
 
-// Envia tweet com texto simples
+// 🐦 Envia tweet com texto simples
 async function enviarTweet(texto) {
   try {
     const { data: tweet } = await twitter.v2.tweet(texto);
@@ -83,13 +83,13 @@ async function enviarTweet(texto) {
     return { id_str: tweet.id };
   } catch (error) {
     console.error('❌ Erro ao postar tweet:', error);
-    if (error?.code) {
-      console.error('Código de Erro do X:', error.code);
+    if (error?.code === 403) {
+      console.error('⚠️ Código 403: verifique se seu token tem escopo tweet.write e se o app está autorizado corretamente.');
     }
   }
 }
 
-// Salva histórico
+// 🗂️ Salva histórico
 function salvarNoHistorico(texto, id) {
   const agora = new Date().toISOString();
   const novo = { texto, id, data: agora };
@@ -103,7 +103,7 @@ function salvarNoHistorico(texto, id) {
   fs.writeFileSync(historicoPath, JSON.stringify(historico, null, 2));
 }
 
-// Função principal com lógica 1 versículo a cada 5 posts
+// 🚀 Função principal com lógica 1 versículo a cada 5 posts
 async function executarTweetUnico() {
   const enviadosHoje = contarTweetsHoje();
   if (enviadosHoje >= LIMITE_DIARIO) {
@@ -123,5 +123,5 @@ async function executarTweetUnico() {
   if (tweet) salvarNoHistorico(texto, tweet.id_str);
 }
 
-// 🚀 Executa
+// 🧭 Executa
 executarTweetUnico();
