@@ -6,7 +6,6 @@ import path from 'path';
 
 dotenv.config();
 
-// Configurações
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const twitter = new TwitterApi({
   appKey: process.env.CONSUMER_KEY,
@@ -103,7 +102,7 @@ function salvarNoHistorico(texto, id) {
   fs.writeFileSync(historicoPath, JSON.stringify(historico, null, 2));
 }
 
-// Função principal com lógica 1 versículo a cada 5 posts
+// Função principal
 async function executarTweetUnico() {
   const enviadosHoje = contarTweetsHoje();
   if (enviadosHoje >= LIMITE_DIARIO) {

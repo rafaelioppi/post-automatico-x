@@ -30,14 +30,25 @@ function salvarNoHistorico(texto, id) {
   fs.writeFileSync(historicoPath, JSON.stringify(historico, null, 2));
 }
 
-async function postarTweet() {
+// ✅ Função para enviar tweet com texto simples usando API v2
+async function enviarTweetSemGif(texto) {
   try {
-    const tweet = await twitter.v1.tweet(tweetTexto);
-    console.log('✅ Tweet enviado:', tweet.id_str);
-    salvarNoHistorico(tweetTexto, tweet.id_str);
+    const { data: tweet } = await twitter.v2.tweet(texto);
+    console.log('✅ Tweet enviado:', tweet.id);
+    return { id_str: tweet.id };
   } catch (error) {
     console.error('❌ Erro ao postar tweet:', error);
+    if (error?.code) {
+      console.error('Código de Erro do X:', error.code);
+    }
   }
 }
 
-postarTweet();
+// ✅ Função principal
+async function executarTweetUnico() {
+  const tweet = await enviarTweetSemGif(tweetTexto);
+  if (tweet) salvarNoHistorico(tweetTexto, tweet.id_str);
+}
+
+// 🚀 Executa
+executarTweetUnico();
