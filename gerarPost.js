@@ -27,6 +27,7 @@ const assuntos = [
 // 🎯 Gera prompt dinâmico
 function gerarPromptDinamico() {
   const assunto = assuntos[Math.floor(Math.random() * assuntos.length)];
+  console.log(`🔄 Gerando post sobre: ${assunto}`);
   return `Crie uma frase interessante, positiva e inspiradora para postar no X (Use emojis e hashtags) com no máximo 344 caracteres sobre ${assunto}. A sua resposta deve ser exatamente o post que será publicado.`;
 }
 
@@ -59,32 +60,48 @@ function variarTexto(texto) {
   return `${texto} ${extra}`;
 }
 
-// 🤖 Gera texto com Gemini
-async function gerarTextoComGemini(prompt) {
+// ⏳ Aguarda alguns segundos
+function esperar(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// 🤖 Gera texto com Gemini com tratamento de erro
+async function gerarTextoComGemini(prompt, tentativas = 3) {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
   const body = { contents: [{ parts: [{ text: prompt }] }] };
 
-  try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+  for (let i = 0; i < tentativas; i++) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
 
-    const result = await response.json();
-    let texto = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    if (!texto) return null;
+      const result = await response.json();
 
-    texto = texto.replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
-    if (texto.length > 344) {
-      texto = texto.slice(0, 341) + '…';
+      if (result?.error?.message?.includes('Quota exceeded') || result?.error?.message?.includes('overloaded')) {
+        console.error(`❌ Erro ao gerar texto com Gemini: ${result.error.message}`);
+        await esperar(3000); // espera 3 segundos antes de tentar novamente
+        continue;
+      }
+
+      let texto = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      if (!texto) return null;
+
+      texto = texto.replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
+      if (texto.length > 344) {
+        texto = texto.slice(0, 341) + '…';
+      }
+
+      return texto.trim();
+    } catch (error) {
+      console.error('❌ Erro ao gerar texto com Gemini:', error);
+      await esperar(3000);
     }
-
-    return texto.trim();
-  } catch (error) {
-    console.error('❌ Erro ao gerar texto com Gemini:', error);
-    return null;
   }
+
+  return null;
 }
 
 // 🐦 Envia tweet
@@ -104,7 +121,7 @@ async function enviarTweet(texto) {
 }
 
 // 🗂️ Salva histórico
-function salvarNoHistorico(texto, id) {
+function salvarNoHistorico(texto, id = null) {
   const agora = new Date().toISOString();
   const novo = { texto, id, data: agora };
 
@@ -115,6 +132,7 @@ function salvarNoHistorico(texto, id) {
 
   historico.push(novo);
   fs.writeFileSync(historicoPath, JSON.stringify(historico, null, 2));
+  console.log(`📜 Histórico salvo com sucesso. Total de posts: ${historico.length}`);
 }
 
 // 🚀 Executa tweet único
@@ -132,12 +150,14 @@ async function executarTweetUnico() {
 
   const texto = await gerarTextoComGemini(prompt);
   if (!texto || texto.trim().length === 0) {
-    console.log('🚫 Texto inválido, tweet não será enviado.');
+    console.log('🚫 Texto inválido ou não gerado. Salvando tentativa no histórico.');
+    salvarNoHistorico('❌ Falha na geração de conteúdo.', null);
     return;
   }
 
   if (textoJaFoiPostado(texto)) {
     console.log('🚫 Texto já foi postado anteriormente. Abortando envio.');
+    salvarNoHistorico(texto, null);
     return;
   }
 
@@ -145,7 +165,7 @@ async function executarTweetUnico() {
   console.log('📝 Conteúdo final:', textoFinal);
 
   const tweet = await enviarTweet(textoFinal);
-  if (tweet) salvarNoHistorico(textoFinal, tweet.id_str);
+  salvarNoHistorico(textoFinal, tweet?.id_str || null);
 }
 
 // 🧭 Inicia execução
