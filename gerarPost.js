@@ -76,18 +76,19 @@ async function gerarTextoComGemini(prompt) {
 }
 
 // 🐦 Envia tweet com texto simples
-async function enviarTweet(texto) {
+  async function enviarTweet(texto) {
   try {
-    const { data: tweet } = await twitter.v2.tweet(texto);
+    const { data: tweet } = await twitter.readWrite.v2.tweet(texto);
     console.log('✅ Tweet enviado:', tweet.id);
     return { id_str: tweet.id };
   } catch (error) {
     console.error('❌ Erro ao postar tweet:', error);
     if (error?.code === 403) {
-      console.error('⚠️ Código 403: verifique se seu token tem escopo tweet.write e se o app está autorizado corretamente.');
+      console.error('⚠️ Código 403: verifique se seu token foi gerado após ativar “Read and write” e se está usando OAuth 1.0a corretamente.');
     }
   }
 }
+
 
 // 🗂️ Salva histórico
 function salvarNoHistorico(texto, id) {
@@ -106,7 +107,8 @@ function salvarNoHistorico(texto, id) {
 // 🚀 Função principal com lógica 1 versículo a cada 5 posts
 async function executarTweetUnico() {
   const enviadosHoje = contarTweetsHoje();
-  if (enviadosHoje >= LIMITE_DIARIO) {
+  if (enviaasync function enviarTweet(texto) {
+dosHoje >= LIMITE_DIARIO) {
     console.log(`🚫 Limite diário de ${LIMITE_DIARIO} tweets atingido.`);
     return;
   }
