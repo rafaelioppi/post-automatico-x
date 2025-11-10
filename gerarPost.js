@@ -6,7 +6,7 @@ import path from 'path';
 
 dotenv.config();
 
-// 🔐 Configurações de autenticação
+// 🔐 Autenticação OAuth 1.0a
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const twitter = new TwitterApi({
   appKey: process.env.CONSUMER_KEY,
@@ -24,7 +24,7 @@ const assuntos = [
   'história', 'ciência', 'cultura', 'esporte', 'gastronomia', 'autoconhecimento'
 ];
 
-// 🎯 Gera prompt dinâmico para frases inspiradoras
+// 🎯 Gera prompt dinâmico
 function gerarPromptDinamico() {
   const assunto = assuntos[Math.floor(Math.random() * assuntos.length)];
   return `Crie uma frase interessante, positiva e inspiradora para postar no X (Use emojis e hashtags) com no máximo 344 caracteres sobre ${assunto}. A sua resposta deve ser exatamente o post que será publicado.`;
@@ -45,7 +45,21 @@ function contarTotalDeTweets() {
   return historico.length;
 }
 
-// 🤖 Gera texto com Gemini com até 344 caracteres
+// 🔁 Verifica se texto já foi postado
+function textoJaFoiPostado(texto) {
+  if (!fs.existsSync(historicoPath)) return false;
+  const historico = JSON.parse(fs.readFileSync(historicoPath, 'utf-8'));
+  return historico.some(item => item.texto === texto);
+}
+
+// ✨ Adiciona variação leve ao texto
+function variarTexto(texto) {
+  const extras = ['✨', '🔥', '🌟', '#Inspire', '#Motivação'];
+  const extra = extras[Math.floor(Math.random() * extras.length)];
+  return `${texto} ${extra}`;
+}
+
+// 🤖 Gera texto com Gemini
 async function gerarTextoComGemini(prompt) {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
   const body = { contents: [{ parts: [{ text: prompt }] }] };
@@ -64,31 +78,30 @@ async function gerarTextoComGemini(prompt) {
     texto = texto.replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
     if (texto.length > 344) {
       texto = texto.slice(0, 341) + '…';
-    } else if (texto.length < 344) {
-      texto = texto.padEnd(344, '…');
     }
 
-    return texto;
+    return texto.trim();
   } catch (error) {
     console.error('❌ Erro ao gerar texto com Gemini:', error);
     return null;
   }
 }
 
-// 🐦 Envia tweet com texto simples
-  async function enviarTweet(texto) {
+// 🐦 Envia tweet
+async function enviarTweet(texto) {
   try {
-    const { data: tweet } = await twitter.readWrite.v2.tweet(texto);
+    const { data: tweet } = await twitter.v2.tweet(texto);
     console.log('✅ Tweet enviado:', tweet.id);
     return { id_str: tweet.id };
   } catch (error) {
     console.error('❌ Erro ao postar tweet:', error);
-    if (error?.code === 403) {
-      console.error('⚠️ Código 403: verifique se seu token foi gerado após ativar “Read and write” e se está usando OAuth 1.0a corretamente.');
+    if (error?.data?.detail?.includes('duplicate')) {
+      console.error('⚠️ Tweet duplicado detectado. Conteúdo já foi postado.');
+    } else if (error?.code === 403) {
+      console.error('⚠️ Código 403: verifique escopo e conteúdo.');
     }
   }
 }
-
 
 // 🗂️ Salva histórico
 function salvarNoHistorico(texto, id) {
@@ -104,11 +117,10 @@ function salvarNoHistorico(texto, id) {
   fs.writeFileSync(historicoPath, JSON.stringify(historico, null, 2));
 }
 
-// 🚀 Função principal com lógica 1 versículo a cada 5 posts
+// 🚀 Executa tweet único
 async function executarTweetUnico() {
   const enviadosHoje = contarTweetsHoje();
-  if (enviaasync function enviarTweet(texto) {
-dosHoje >= LIMITE_DIARIO) {
+  if (enviadosHoje >= LIMITE_DIARIO) {
     console.log(`🚫 Limite diário de ${LIMITE_DIARIO} tweets atingido.`);
     return;
   }
@@ -119,11 +131,22 @@ dosHoje >= LIMITE_DIARIO) {
     : gerarPromptDinamico();
 
   const texto = await gerarTextoComGemini(prompt);
-  if (!texto) return;
+  if (!texto || texto.trim().length === 0) {
+    console.log('🚫 Texto inválido, tweet não será enviado.');
+    return;
+  }
 
-  const tweet = await enviarTweet(texto);
-  if (tweet) salvarNoHistorico(texto, tweet.id_str);
+  if (textoJaFoiPostado(texto)) {
+    console.log('🚫 Texto já foi postado anteriormente. Abortando envio.');
+    return;
+  }
+
+  const textoFinal = variarTexto(texto);
+  console.log('📝 Conteúdo final:', textoFinal);
+
+  const tweet = await enviarTweet(textoFinal);
+  if (tweet) salvarNoHistorico(textoFinal, tweet.id_str);
 }
 
-// 🧭 Executa
+// 🧭 Inicia execução
 executarTweetUnico();
