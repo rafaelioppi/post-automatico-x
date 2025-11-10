@@ -3,8 +3,6 @@ import { TwitterApi } from 'twitter-api-v2';
 import fetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';
-import GIFEncoder from 'gifencoder';
-import { createCanvas } from 'canvas';
 
 dotenv.config();
 
@@ -20,17 +18,16 @@ const client = new TwitterApi({
 const historicoPath = path.resolve('historico.json');
 const LIMITE_DIARIO = 17;
 
-// Assuntos para prompts
 const assuntos = [
   'vida cotidiana', 'saúde', 'natureza', 'arte', 'música', 'viagens',
   'curiosidade', 'inspiração', 'amizade', 'emocional', 'diversão', 'humor',
   'história', 'ciência', 'cultura', 'esporte', 'gastronomia', 'autoconhecimento'
 ];
 
-// Gera prompt dinâmico
+// Gera prompt dinâmico para frases inspiradoras
 function gerarPromptDinamico() {
   const assunto = assuntos[Math.floor(Math.random() * assuntos.length)];
-  return `Crie uma frase interessante, positiva e inspiradora para postar no X (Use emojois e ##)com no máximo 280 caracteres sobre ${assunto}.`;
+  return `Crie uma frase interessante, positiva e inspiradora para postar no X (Use emojis e hashtags) com no máximo 344 caracteres sobre ${assunto}. A sua resposta deve ser exatamente o post que será publicado.`;
 }
 
 // Conta tweets enviados hoje
@@ -41,10 +38,15 @@ function contarTweetsHoje() {
   return historico.filter(item => item.data.startsWith(hoje)).length;
 }
 
-// Gera texto com Gemini com exatamente 280 caracteres
-async function gerarTextoComGemini() {
-  const prompt = gerarPromptDinamico();
+// Conta total de tweets enviados
+function contarTotalDeTweets() {
+  if (!fs.existsSync(historicoPath)) return 0;
+  const historico = JSON.parse(fs.readFileSync(historicoPath, 'utf-8'));
+  return historico.length;
+}
 
+// Gera texto com Gemini com até 344 caracteres
+async function gerarTextoComGemini(prompt) {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
   const body = { contents: [{ parts: [{ text: prompt }] }] };
 
@@ -60,12 +62,10 @@ async function gerarTextoComGemini() {
     if (!texto) return null;
 
     texto = texto.replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
-
-    // Ajusta para exatamente 280 caracteres
-    if (texto.length > 280) {
-      texto = texto.slice(0, 277) + '…';
-    } else if (texto.length < 280) {
-      texto = texto.padEnd(280, '…');
+    if (texto.length > 344) {
+      texto = texto.slice(0, 341) + '…';
+    } else if (texto.length < 344) {
+      texto = texto.padEnd(344, '…');
     }
 
     return texto;
@@ -75,49 +75,11 @@ async function gerarTextoComGemini() {
   }
 }
 
-// Gera GIF com frase
-async function gerarGif(frase, arquivoSaida = 'saida.gif') {
-  const width = 500;
-  const height = 500;
-  const encoder = new GIFEncoder(width, height);
-
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext('2d');
-
-  const stream = encoder.createReadStream();
-  const writeStream = fs.createWriteStream(arquivoSaida);
-  stream.pipe(writeStream);
-
-  encoder.start();
-  encoder.setRepeat(0);
-  encoder.setDelay(1000);
-  encoder.setQuality(10);
-
-  // Cria 3 frames com movimento
-  for (let i = 0; i < 3; i++) {
-    ctx.fillStyle = `hsl(${i * 60}, 50%, 90%)`;
-    ctx.fillRect(0, 0, width, height);
-    ctx.fillStyle = 'black';
-    ctx.font = 'bold 20px Arial';
-    ctx.fillText(frase, 20, height / 2 + i * 5);
-    encoder.addFrame(ctx);
-  }
-
-  encoder.finish();
-
-  await new Promise((resolve, reject) => {
-    writeStream.on('finish', resolve);
-    writeStream.on('error', reject);
-  });
-
-  return arquivoSaida;
-}
-
-// Envia tweet apenas com texto (sem GIF)
+// Envia tweet apenas com texto
 async function enviarTweetSemGif(texto) {
   try {
-    const tweet = await client.v2.tweet(texto);
-    console.log('✅ Tweet enviado sem GIF:', tweet.data.id);
+    const tweet = await client.v1.tweet(texto);
+    console.log('✅ Tweet enviado:', tweet.id_str);
     return tweet;
   } catch (error) {
     console.error('❌ Erro ao postar tweet:', error);
@@ -138,7 +100,7 @@ function salvarNoHistorico(texto, id) {
   fs.writeFileSync(historicoPath, JSON.stringify(historico, null, 2));
 }
 
-// Função principal
+// Função principal com lógica 1 versículo a cada 5 posts
 async function executarTweetUnico() {
   const enviadosHoje = contarTweetsHoje();
   if (enviadosHoje >= LIMITE_DIARIO) {
@@ -146,14 +108,16 @@ async function executarTweetUnico() {
     return;
   }
 
-  const texto = await gerarTextoComGemini();
+  const totalEnviados = contarTotalDeTweets();
+  const prompt = totalEnviados % 5 === 0
+    ? `Crie um versículo bíblico com citação (livro, capítulo e versículo) seguido de um breve resumo inspirador. Use emojis e hashtags. O texto completo deve ter no máximo 344 caracteres. A sua resposta deve ser exatamente o post que será publicado.`
+    : gerarPromptDinamico();
+
+  const texto = await gerarTextoComGemini(prompt);
   if (!texto) return;
 
-  await gerarGif(texto); // Gera o GIF localmente
-
-  const tweet = await enviarTweetSemGif(texto); // Posta só o texto
-  if (tweet) salvarNoHistorico(texto, tweet.data.id);
+  const tweet = await enviarTweetSemGif(texto);
+  if (tweet) salvarNoHistorico(texto, tweet.id_str);
 }
 
-// Executa
 executarTweetUnico();
