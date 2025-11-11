@@ -146,14 +146,15 @@ async function executarTweetUnico() {
   const totalEnviados = contarTotalDeTweets();
   let prompt, tipo;
 
-  if ((totalEnviados + 1) % 5 === 0) {
-    // A cada 5º post
+// ✅ A cada 5 posts normais, o próximo será versículo
+  if (totalEnviados > 0 && totalEnviados % 5 === 0) {
     prompt = `Crie um versículo bíblico com citação (livro, capítulo e versículo) seguido de um breve resumo inspirador. Use emojis e hashtags. O texto completo deve ter no máximo 344 caracteres. A sua resposta deve ser exatamente o post que será publicado.`;
     tipo = 'versiculo';
   } else {
     prompt = gerarPromptDinamico();
     tipo = 'normal';
   }
+
 
   const texto = await gerarTextoComGemini(prompt);
   if (!texto || texto.trim().length === 0) {
