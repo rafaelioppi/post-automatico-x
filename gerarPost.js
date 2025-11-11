@@ -173,8 +173,13 @@ async function executarTweetUnico() {
   console.log('📝 Conteúdo final:', textoFinal);
 
   const tweet = await enviarTweet(textoFinal);
-  salvarNoHistorico(textoFinal, tweet?.id_str || null, tipo);
-}
+    if (tweet?.id_str) {
+    salvarNoHistorico(textoFinal, tweet.id_str, tipo);
+  } else {
+    console.log("🚫 Tweet não enviado, não será contado no histórico.");
+  }
+
+  }
 
 
 // 🧭 Inicia execução
