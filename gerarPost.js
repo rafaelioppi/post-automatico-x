@@ -121,9 +121,9 @@ async function enviarTweet(texto) {
 }
 
 // 🗂️ Salva histórico
-function salvarNoHistorico(texto, id = null) {
+function salvarNoHistorico(texto, id = null, tipo = 'normal') {
   const agora = new Date().toISOString();
-  const novo = { texto, id, data: agora };
+  const novo = { texto, id, data: agora, tipo };
 
   let historico = [];
   if (fs.existsSync(historicoPath)) {
@@ -135,6 +135,7 @@ function salvarNoHistorico(texto, id = null) {
   console.log(`📜 Histórico salvo com sucesso. Total de posts: ${historico.length}`);
 }
 
+
 // 🚀 Executa tweet único
 async function executarTweetUnico() {
   const enviadosHoje = contarTweetsHoje();
@@ -144,20 +145,27 @@ async function executarTweetUnico() {
   }
 
   const totalEnviados = contarTotalDeTweets();
-  const prompt = totalEnviados % 5 === 0
-    ? `Crie um versículo bíblico com citação (livro, capítulo e versículo) seguido de um breve resumo inspirador. Use emojis e hashtags. O texto completo deve ter no máximo 344 caracteres. A sua resposta deve ser exatamente o post que será publicado.`
-    : gerarPromptDinamico();
+  let prompt, tipo;
+
+  if ((totalEnviados + 1) % 5 === 0) {
+    // A cada 5º post
+    prompt = `Crie um versículo bíblico com citação (livro, capítulo e versículo) seguido de um breve resumo inspirador. Use emojis e hashtags. O texto completo deve ter no máximo 344 caracteres. A sua resposta deve ser exatamente o post que será publicado.`;
+    tipo = 'versiculo';
+  } else {
+    prompt = gerarPromptDinamico();
+    tipo = 'normal';
+  }
 
   const texto = await gerarTextoComGemini(prompt);
   if (!texto || texto.trim().length === 0) {
     console.log('🚫 Texto inválido ou não gerado. Salvando tentativa no histórico.');
-    salvarNoHistorico('❌ Falha na geração de conteúdo.', null);
+    salvarNoHistorico('❌ Falha na geração de conteúdo.', null, 'erro');
     return;
   }
 
   if (textoJaFoiPostado(texto)) {
     console.log('🚫 Texto já foi postado anteriormente. Abortando envio.');
-    salvarNoHistorico(texto, null);
+    salvarNoHistorico(texto, null, tipo);
     return;
   }
 
@@ -165,8 +173,9 @@ async function executarTweetUnico() {
   console.log('📝 Conteúdo final:', textoFinal);
 
   const tweet = await enviarTweet(textoFinal);
-  salvarNoHistorico(textoFinal, tweet?.id_str || null);
+  salvarNoHistorico(textoFinal, tweet?.id_str || null, tipo);
 }
+
 
 // 🧭 Inicia execução
 executarTweetUnico();
