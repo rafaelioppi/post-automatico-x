@@ -20,7 +20,7 @@ const LIMITE_DIARIO = 17;
 
 const assuntos = [
   'noticiais autuais sobre guerra', 'noticiais atuais do Rio grande do sul', 'atualidades', 'ultimas noticiais do Zero Hora', 'noticias de Porto Alegre', 'viagens',
-  'curiosidade', 'inspiração', 'amizade', 'aventura', 'sonhos', 'superação', 'felicidade', 'criatividade', 'liderança','empreendedorismo', 'inovação', 'carreira', 'desenvolvimento pessoal'
+  'curiosidade', 'inspiração', 'amizade', 'aventura', 'sonhos', 'superação', 'felicidade', 'criatividade', 'liderança','empreendedorismo', 'inovação', 'carreira', 'desenvolvimento pessoal', 'principal noticia do site cnn brasil'
 ];
 
 // 🎯 Gera prompt dinâmico
