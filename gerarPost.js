@@ -19,12 +19,8 @@ const historicoPath = path.resolve('historico.json');
 const LIMITE_DIARIO = 17;
 
 const assuntos = [
-  'vida cotidiana', 'saúde', 'natureza', 'arte', 'música', 'viagens',
-  'curiosidade', 'inspiração', 'amizade', 'emocional', 'diversão', 'humor',
-  'história', 'ciência', 'cultura', 'esporte', 'gastronomia', 'autoconhecimento',
-  'tecnologia', 'filosofia', 'literatura', 'cinema', 'fotografia', 'motivação',
-  'positividade', 'família', 'educação', 'sustentabilidade', 'meditação',
-  'aventura', 'sonhos', 'superação', 'felicidade', 'criatividade', 'liderança','empreendedorismo', 'inovação', 'carreira', 'desenvolvimento pessoal'
+  'noticiais autuais sobre guerra', 'noticiais atuais do Rio grande do sul', 'atualidades', 'ultimas noticiais do Zero Hora', 'noticias de Porto Alegre', 'viagens',
+  'curiosidade', 'inspiração', 'amizade', 'aventura', 'sonhos', 'superação', 'felicidade', 'criatividade', 'liderança','empreendedorismo', 'inovação', 'carreira', 'desenvolvimento pessoal'
 ];
 
 // 🎯 Gera prompt dinâmico
