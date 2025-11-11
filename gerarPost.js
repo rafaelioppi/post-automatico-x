@@ -21,7 +21,10 @@ const LIMITE_DIARIO = 17;
 const assuntos = [
   'vida cotidiana', 'saúde', 'natureza', 'arte', 'música', 'viagens',
   'curiosidade', 'inspiração', 'amizade', 'emocional', 'diversão', 'humor',
-  'história', 'ciência', 'cultura', 'esporte', 'gastronomia', 'autoconhecimento'
+  'história', 'ciência', 'cultura', 'esporte', 'gastronomia', 'autoconhecimento',
+  'tecnologia', 'filosofia', 'literatura', 'cinema', 'fotografia', 'motivação',
+  'positividade', 'família', 'educação', 'sustentabilidade', 'meditação',
+  'aventura', 'sonhos', 'superação', 'felicidade', 'criatividade', 'liderança','empreendedorismo', 'inovação', 'carreira', 'desenvolvimento pessoal'
 ];
 
 // 🎯 Gera prompt dinâmico
