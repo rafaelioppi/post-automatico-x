@@ -16,11 +16,14 @@ const twitter = new TwitterApi({
 });
 
 const historicoPath = path.resolve('historico.json');
+const contadorPath = path.resolve('contador.json');
 const LIMITE_DIARIO = 17;
 
 const assuntos = [
-  'noticiais autuais sobre guerra', 'noticiais atuais do Rio grande do sul', 'atualidades', 'ultimas noticiais do Zero Hora', 'noticias de Porto Alegre', 'viagens',
-  'curiosidade', 'inspiração', 'amizade', 'aventura', 'sonhos', 'superação', 'felicidade', 'criatividade', 'liderança','empreendedorismo', 'inovação', 'carreira', 'desenvolvimento pessoal', 'principal noticia do site cnn brasil'
+  'notícias atuais sobre guerra', 'notícias atuais do Rio Grande do Sul', 'atualidades', 'últimas notícias do Zero Hora',
+  'notícias de Porto Alegre', 'viagens', 'curiosidade', 'inspiração', 'amizade', 'aventura', 'sonhos',
+  'superação', 'felicidade', 'criatividade', 'liderança', 'empreendedorismo', 'inovação', 'carreira',
+  'desenvolvimento pessoal', 'principal notícia do site CNN Brasil'
 ];
 
 // 🎯 Gera prompt dinâmico
@@ -28,6 +31,21 @@ function gerarPromptDinamico() {
   const assunto = assuntos[Math.floor(Math.random() * assuntos.length)];
   console.log(`🔄 Gerando post sobre: ${assunto}`);
   return `Crie uma frase interessante, positiva e inspiradora para postar no X (Use emojis e hashtags) com no máximo 344 caracteres sobre ${assunto}. A sua resposta deve ser exatamente o post que será publicado.`;
+}
+
+// 📂 Lê contador persistente
+function lerContador() {
+  try {
+    const data = fs.readFileSync(contadorPath, 'utf8');
+    return JSON.parse(data).count || 0;
+  } catch {
+    return 0; // se não existir, começa do zero
+  }
+}
+
+// 📂 Salva contador persistente
+function salvarContador(count) {
+  fs.writeFileSync(contadorPath, JSON.stringify({ count }));
 }
 
 // 📊 Conta tweets enviados hoje
@@ -81,7 +99,7 @@ async function gerarTextoComGemini(prompt, tentativas = 3) {
 
       if (result?.error?.message?.includes('Quota exceeded') || result?.error?.message?.includes('overloaded')) {
         console.error(`❌ Erro ao gerar texto com Gemini: ${result.error.message}`);
-        await esperar(3000); // espera 3 segundos antes de tentar novamente
+        await esperar(3000);
         continue;
       }
 
@@ -134,7 +152,6 @@ function salvarNoHistorico(texto, id = null, tipo = 'normal') {
   console.log(`📜 Histórico salvo com sucesso. Total de posts: ${historico.length}`);
 }
 
-
 // 🚀 Executa tweet único
 async function executarTweetUnico() {
   const enviadosHoje = contarTweetsHoje();
@@ -143,18 +160,16 @@ async function executarTweetUnico() {
     return;
   }
 
-  const totalEnviados = contarTotalDeTweets();
+  let contador = lerContador();
   let prompt, tipo;
 
-// ✅ A cada 5 posts normais, o próximo será versículo
-  if (totalEnviados > 0 && totalEnviados % 5 === 0) {
-    prompt = `Crie um versículo bíblico com citação (livro, capítulo e versículo) seguido de um breve resumo inspirador. Use emojis e hashtags. O texto completo deve ter no máximo 344 caracteres. A sua resposta deve ser exatamente o post que será publicado.`;
+  if (contador >= 4) { // se já houver 4 posts normais, o próximo é versículo
+    prompt = `Crie um versículo bíblico com citação (livro, capítulo e versículo) seguido de um breve resumo inspirador. Use emojis e hashtags. Máximo 344 caracteres.`;
     tipo = 'versiculo';
   } else {
     prompt = gerarPromptDinamico();
     tipo = 'normal';
   }
-
 
   const texto = await gerarTextoComGemini(prompt);
   if (!texto || texto.trim().length === 0) {
@@ -172,14 +187,31 @@ async function executarTweetUnico() {
   const textoFinal = variarTexto(texto);
   console.log('📝 Conteúdo final:', textoFinal);
 
-  const tweet = await enviarTweet(textoFinal);
+  try {
+    const tweet = await enviarTweet(textoFinal);
     if (tweet?.id_str) {
-    salvarNoHistorico(textoFinal, tweet.id_str, tipo);
-  } else {
-    console.log("🚫 Tweet não enviado, não será contado no histórico.");
-  }
+      salvarNoHistorico(textoFinal, tweet.id_str, tipo);
 
+      // ✅ Só atualiza contador se realmente publicou
+      if (tipo === 'versiculo') {
+        salvarContador(0); // reseta após versículo
+      } else {
+        salvarContador(contador + 1); // incrementa apenas se post normal foi publicado
+      }
+    } else {
+      console.log("🚫 Tweet não enviado, contador não será atualizado.");
+    }
+  } catch (error) {
+    console.error("❌ Erro ao postar tweet:", error);
+
+    // 🔎 Se erro for 429, mostrar horário de reset
+    if (error?.code === 429 && error?.rateLimit?.day?.reset) {
+      const resetDate = new Date(error.rateLimit.day.reset * 1000);
+      console.log(`⏳ Limite diário será resetado em: ${resetDate.toLocaleString()}`);
+    }
   }
+}
+
 
 
 // 🧭 Inicia execução

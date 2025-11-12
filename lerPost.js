@@ -14,22 +14,6 @@ const twitter = new TwitterApi({
   accessSecret: process.env.ACCESS_TOKEN_SECRET,
 });
 
-// 🎯 Lista de 5 temas
-const assuntos = [
-  "inovação tecnológica",
-  "desenvolvimento pessoal",
-  "liderança inspiradora",
-  "superação de desafios",
-  "criatividade no trabalho"
-];
-
-// 🔁 Escolhe um tema aleatório
-function escolherAssunto() {
-  const tema = assuntos[Math.floor(Math.random() * assuntos.length)];
-  console.log(`🔄 Tema escolhido: ${tema}`);
-  return tema;
-}
-
 // ⏳ Aguarda alguns segundos
 function esperar(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -52,7 +36,7 @@ async function enviarParaGemini(prompt, tentativas = 3) {
 
       if (result?.error?.message) {
         console.error(`❌ Erro Gemini: ${result.error.message}`);
-        await esperar(5000); // espera 5 segundos antes de tentar novamente
+        await esperar(5000);
         continue;
       }
 
@@ -83,43 +67,38 @@ async function postarNoTwitter(texto) {
   }
 }
 
-// 📖 Lê um post público de outro usuário no X sobre um assunto
-async function lerPostDeOutroUsuario(assunto) {
+// 📖 Lê o último post da CNN Brasil
+async function lerUltimoPostCNNBrasil() {
   try {
-    const { data } = await twitter.v2.search(assunto, {
+    const { data } = await twitter.v2.search('from:CNNBrasil -is:retweet lang:pt', {
       'tweet.fields': ['author_id', 'created_at'],
-      max_results: 10 // ✅ mínimo permitido
+      max_results: 5
     });
 
     if (data && data.length > 0) {
-      const post = data[0]; // pega o primeiro tweet encontrado
-      console.log(`📖 Post encontrado sobre "${assunto}": ${post.text}`);
+      const post = data[0]; // pega o tweet mais recente
+      console.log(`📖 Último post da CNN Brasil: ${post.text}`);
       console.log(`👤 Usuário ID: ${post.author_id}`);
       console.log(`🕒 Criado em: ${new Date(post.created_at).toLocaleString()}`);
 
-      // 🔹 Gera novo post com Gemini a partir do conteúdo lido
-      const prompt = `Crie um post inspirador e positivo baseado neste conteúdo: "${post.text}". Use emojis e hashtags. Máximo 344 caracteres.`;
+      const prompt = `Leia o seguinte tweet da CNN Brasil: "${post.text}". 
+      Faça um resumo curto e inspirador do conteúdo, em forma de post para o X. 
+      Use emojis e hashtags. Máximo 344 caracteres. 
+      A resposta deve ser exatamente o post que será publicado.`;
+
       const respostaIA = await enviarParaGemini(prompt);
+      const textoFinal = respostaIA || `Resumo automático: ${post.text}`;
 
-      const textoFinal = respostaIA || post.text;
-
-      // 🔹 Posta no Twitter
       await postarNoTwitter(textoFinal);
-
     } else {
-      console.log(`🚫 Nenhum post encontrado sobre "${assunto}".`);
+      console.log("🚫 Nenhum post encontrado da CNN Brasil.");
     }
   } catch (error) {
-    if (error.code === 400) {
-      console.error("🚫 Erro 400: Requisição inválida. Verifique parâmetros da busca.");
-    } else if (error.code === 429) {
-      console.error("🚫 Erro 429: Limite da API do Twitter atingido. Aguarde o reset.");
-    } else {
-      console.error("❌ Erro ao buscar post de outro usuário:", error);
-    }
+    console.error("❌ Erro ao buscar último post da CNN Brasil:", error);
   }
 }
 
-// 🚀 Executa leitura de um post público sobre o tema escolhido
-const tema = escolherAssunto();
-lerPostDeOutroUsuario(tema);
+// 🚀 Executa
+lerUltimoPostCNNBrasil();
+
+
