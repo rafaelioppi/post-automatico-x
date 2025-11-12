@@ -21,7 +21,7 @@ const LIMITE_DIARIO = 17;
 
 const assuntos = [
   'notícias atuais sobre guerra', 'notícias atuais do Rio Grande do Sul', 'atualidades', 'últimas notícias do Zero Hora',
-  'notícias de Porto Alegre', 'viagens', 'curiosidade', 'inspiração', 'amizade', 'aventura', 'sonhos',
+  'porto alegre - rs ', 'viagens', 'curiosidade', 'inspiração', 'amizade', 'aventura', 'sonhos',
   'superação', 'felicidade', 'criatividade', 'liderança', 'empreendedorismo', 'inovação', 'carreira',
   'desenvolvimento pessoal', 'principal notícia do site CNN Brasil'
 ];
