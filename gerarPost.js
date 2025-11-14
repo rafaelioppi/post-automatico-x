@@ -30,7 +30,7 @@ const assuntos = [
 function gerarPromptDinamico() {
   const assunto = assuntos[Math.floor(Math.random() * assuntos.length)];
   console.log(`🔄 Gerando post sobre: ${assunto}`);
-  return `Crie uma frase interessante, positiva e inspiradora para postar no X (Use emojis e hashtags) com no máximo 344 caracteres sobre ${assunto}. A sua resposta deve ser exatamente o post que será publicado.`;
+  return assunto;
 }
 
 // 📂 Lê contador persistente
@@ -82,6 +82,68 @@ function esperar(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// 🔎 Decide se precisa pesquisar na web
+function precisaPesquisar(assunto) {
+  const chaves = ["guerra", "atualidades", "notícia", "CNN", "Zero Hora", "Rio Grande do Sul"];
+  return chaves.some(chave => assunto.toLowerCase().includes(chave.toLowerCase()));
+}
+
+// 🌐 Busca na web usando Gemini
+async function buscarNaWeb(assunto) {
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+  const prompt = `Pesquise na internet sobre "${assunto}" e faça um resumo curto e objetivo 
+em tom neutro, sem manchetes e sem links. Máximo 300 caracteres.`;
+
+  const body = { contents: [{ parts: [{ text: prompt }] }] };
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const result = await response.json();
+    let resumo = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+    if (!resumo) return "sem resultados recentes";
+
+    resumo = resumo.replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
+    return resumo;
+  } catch (error) {
+    console.error("❌ Erro ao buscar com Gemini:", error);
+    return "sem resultados recentes";
+  }
+}
+
+// 🤖 Gera texto com Gemini com ou sem pesquisa web (ajustado)
+async function gerarTextoComGeminiOuWeb(assunto) {
+  let contexto = "";
+
+  if (precisaPesquisar(assunto)) {
+    console.log(`🌐 Pesquisando na internet sobre: ${assunto}`);
+    const resultados = await buscarNaWeb(assunto);
+
+    const resultadosLimpos = resultados
+      .replace(/https?:\/\/\S+/g, '')
+      .replace(/["']/g, '')
+      .replace(/\bnotícia(s)?\b/gi, 'informação')
+      .replace(/\bCNN\b/gi, 'um portal de notícias')
+      .replace(/\bZero Hora\b/gi, 'um jornal local')
+      .trim();
+
+    contexto = `Resumo positivo e inspirador sobre ${assunto}: ${resultadosLimpos}`;
+  }
+
+  const prompt = contexto
+    ? `Crie um post inspirador para o X (máx 344 caracteres), usando emojis e hashtags, sobre ${assunto}. 
+       Use como base estas informações, mas NÃO copie manchetes, NÃO cite veículos de imprensa e NÃO inclua links: ${contexto}.`
+    : `Crie uma frase inspiradora para postar no X (máx 344 caracteres), usando emojis e hashtags, sobre ${assunto}. 
+       A resposta deve ser exatamente o post que será publicado.`;
+
+  return await gerarTextoComGemini(prompt);
+}
+
 // 🤖 Gera texto com Gemini com tratamento de erro
 async function gerarTextoComGemini(prompt, tentativas = 3) {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
@@ -99,7 +161,7 @@ async function gerarTextoComGemini(prompt, tentativas = 3) {
 
       if (result?.error?.message?.includes('Quota exceeded') || result?.error?.message?.includes('overloaded')) {
         console.error(`❌ Erro ao gerar texto com Gemini: ${result.error.message}`);
-        await esperar(3000);
+        await esperar(5000); // espera maior
         continue;
       }
 
@@ -114,7 +176,7 @@ async function gerarTextoComGemini(prompt, tentativas = 3) {
       return texto.trim();
     } catch (error) {
       console.error('❌ Erro ao gerar texto com Gemini:', error);
-      await esperar(3000);
+      await esperar(5000);
     }
   }
 
@@ -161,17 +223,17 @@ async function executarTweetUnico() {
   }
 
   let contador = lerContador();
-  let prompt, tipo;
+  let assunto, tipo;
 
-  if (contador >= 4) { // se já houver 4 posts normais, o próximo é versículo
-    prompt = `Crie um versículo bíblico com citação (livro, capítulo e versículo) seguido de um breve resumo inspirador. Use emojis e hashtags. Máximo 344 caracteres.`;
+  if (contador >= 4) {
+    assunto = "versículo bíblico";
     tipo = 'versiculo';
   } else {
-    prompt = gerarPromptDinamico();
+    assunto = gerarPromptDinamico();
     tipo = 'normal';
   }
 
-  const texto = await gerarTextoComGemini(prompt);
+  const texto = await gerarTextoComGeminiOuWeb(assunto); // ✅ ajuste aqui
   if (!texto || texto.trim().length === 0) {
     console.log('🚫 Texto inválido ou não gerado. Salvando tentativa no histórico.');
     salvarNoHistorico('❌ Falha na geração de conteúdo.', null, 'erro');
@@ -191,7 +253,6 @@ async function executarTweetUnico() {
     const tweet = await enviarTweet(textoFinal);
     if (tweet?.id_str) {
       salvarNoHistorico(textoFinal, tweet.id_str, tipo);
-
       // ✅ Só atualiza contador se realmente publicou
       if (tipo === 'versiculo') {
         salvarContador(0); // reseta após versículo
@@ -211,8 +272,6 @@ async function executarTweetUnico() {
     }
   }
 }
-
-
 
 // 🧭 Inicia execução
 executarTweetUnico();
