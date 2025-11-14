@@ -72,7 +72,7 @@ async function lerUltimoPostCNNBrasil() {
   try {
     const { data } = await twitter.v2.search('from:CNNBrasil -is:retweet lang:pt', {
       'tweet.fields': ['author_id', 'created_at'],
-      max_results: 5
+      max_results: 30
     });
 
     if (data && data.length > 0) {
