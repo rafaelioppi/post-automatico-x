@@ -1,0 +1,30 @@
+name: Interagir com seguidores
+
+on:
+  schedule:
+    - cron: "0 13 * * *"   # roda todo dia às 13h (horário UTC)
+  workflow_dispatch:        # permite rodar manualmente também
+
+jobs:
+  responder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Executar script de interação
+        run: node interagir.js
+        env:
+          CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
+          CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}

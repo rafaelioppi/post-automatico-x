@@ -284,5 +284,23 @@
     "id": null,
     "data": "2025-11-14T13:46:43.585Z",
     "tipo": "erro"
+  },
+  {
+    "texto": "❌ Falha na geração de conteúdo.",
+    "id": null,
+    "data": "2025-11-14T16:03:01.058Z",
+    "tipo": "erro"
+  },
+  {
+    "texto": "❌ Falha na geração de conteúdo.",
+    "id": null,
+    "data": "2025-11-14T16:12:34.288Z",
+    "tipo": "erro"
+  },
+  {
+    "texto": "❌ Falha na geração de conteúdo.",
+    "id": null,
+    "data": "2025-11-14T16:12:59.229Z",
+    "tipo": "erro"
   }
 ]

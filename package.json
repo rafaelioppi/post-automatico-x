@@ -5,6 +5,7 @@
         "axios": "^1.13.2",
         "dotenv": "^17.2.3",
         "gifencoder": "^2.0.1",
+        "node-cron": "^4.2.1",
         "node-fetch": "^3.3.2",
         "twitter-api-v2": "^1.27.0",
         "twitter.js": "^0.14.0"

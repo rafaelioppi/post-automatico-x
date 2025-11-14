@@ -74,21 +74,40 @@ function esperar(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// 🤖 Gera texto com Gemini (sem busca na web)
+// 🤖 Gera texto com Gemini (dinâmico e sempre diferente)
 async function gerarTextoComGeminiOuWeb(assunto) {
+  // número aleatório para variar o prompt
+  const variacao = Math.floor(Math.random() * 10000);
+
   const prompt = assunto === "versículo bíblico"
     ? `Escreva um versículo bíblico curto e inspirador para postar no X (máx 344 caracteres). 
-       Use emojis e hashtags. Sempre vá mudando os versiculos, não gere o mesmo. A resposta deve ser exatamente o post que será publicado e deve constar .`
+       Use emojis e hashtags. Sempre vá mudando os versículos, não gere o mesmo. 
+       Variação: ${variacao}. 
+       A resposta deve ser exatamente o post que será publicado.`
     : `Crie uma frase inspiradora para postar no X (máx 344 caracteres), usando emojis e hashtags, sobre ${assunto}. 
+       Sempre gere frases diferentes, não repita anteriores. 
+       Variação: ${variacao}. 
        A resposta deve ser exatamente o post que será publicado.`;
 
   return await gerarTextoComGemini(prompt);
 }
 
-// 🤖 Gera texto com Gemini com tratamento de erro
+// 🤖 Gera texto com Gemini com tratamento de erro + seed aleatória
 async function gerarTextoComGemini(prompt, tentativas = 3) {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-  const body = { contents: [{ parts: [{ text: prompt }] }] };
+  
+  // seed aleatória para reforçar diversidade
+  const seed = Math.floor(Math.random() * 1000000);
+
+  const body = { 
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { 
+      temperature: 0.9,   // mais criatividade
+      topP: 0.95,         // maior diversidade
+      candidateCount: 1,
+      seed: seed          // força variação
+    }
+  };
 
   for (let i = 0; i < tentativas; i++) {
     try {
