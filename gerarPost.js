@@ -76,7 +76,6 @@ function esperar(ms) {
 
 // 🤖 Gera texto com Gemini (dinâmico e sempre diferente)
 async function gerarTextoComGeminiOuWeb(assunto) {
-  // número aleatório para variar o prompt
   const variacao = Math.floor(Math.random() * 10000);
 
   const prompt = assunto === "versículo bíblico"
@@ -95,17 +94,15 @@ async function gerarTextoComGeminiOuWeb(assunto) {
 // 🤖 Gera texto com Gemini com tratamento de erro + seed aleatória
 async function gerarTextoComGemini(prompt, tentativas = 3) {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-  
-  // seed aleatória para reforçar diversidade
   const seed = Math.floor(Math.random() * 1000000);
 
   const body = { 
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: { 
-      temperature: 0.9,   // mais criatividade
-      topP: 0.95,         // maior diversidade
+      temperature: 0.9,
+      topP: 0.95,
       candidateCount: 1,
-      seed: seed          // força variação
+      seed: seed
     }
   };
 
@@ -179,13 +176,12 @@ async function executarTweetUnico() {
   const enviadosHoje = contarTweetsHoje();
   if (enviadosHoje >= LIMITE_DIARIO) {
     console.log(`🚫 Limite diário de ${LIMITE_DIARIO} tweets atingido.`);
-    return;
+    process.exit(1); // falha → não posta
   }
 
   let contador = lerContador();
   let assunto, tipo;
 
-  // ✅ A cada 3 posts normais, o próximo é versículo
   if (contador >= 3) {
     assunto = "versículo bíblico";
     tipo = 'versiculo';
@@ -196,15 +192,15 @@ async function executarTweetUnico() {
 
   const texto = await gerarTextoComGeminiOuWeb(assunto);
   if (!texto || texto.trim().length === 0) {
-    console.log('🚫 Texto inválido ou não gerado. Salvando tentativa no histórico.');
+    console.log('🚫 Texto inválido ou não gerado.');
     salvarNoHistorico('❌ Falha na geração de conteúdo.', null, 'erro');
-    return;
+    process.exit(1); // falha
   }
 
   if (textoJaFoiPostado(texto)) {
     console.log('🚫 Texto já foi postado anteriormente. Abortando envio.');
     salvarNoHistorico(texto, null, tipo);
-    return;
+    process.exit(1); // falha
   }
 
   const textoFinal = variarTexto(texto);
@@ -215,15 +211,18 @@ async function executarTweetUnico() {
     if (tweet?.id_str) {
       salvarNoHistorico(textoFinal, tweet.id_str, tipo);
       if (tipo === 'versiculo') {
-        salvarContador(0); // reseta após versículo
+        salvarContador(0);
       } else {
-        salvarContador(contador + 1); // incrementa posts normais
+        salvarContador(contador + 1);
       }
+      process.exit(0); // sucesso
     } else {
-      console.log("🚫 Tweet não enviado, contador não será atualizado.");
+      console.log("🚫 Tweet não enviado.");
+      process.exit(1); // falha
     }
   } catch (error) {
     console.error("❌ Erro ao postar tweet:", error);
+    process.exit(1); // falha
   }
 }
 
