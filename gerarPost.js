@@ -210,11 +210,13 @@ async function executarTweetUnico() {
     const tweet = await enviarTweet(textoFinal);
     if (tweet?.id_str) {
       salvarNoHistorico(textoFinal, tweet.id_str, tipo);
+
       if (tipo === 'versiculo') {
-        salvarContador(0);
+        salvarContador(0); // reseta após versículo
       } else {
-        salvarContador(contador + 1);
+        salvarContador(contador + 1); // incrementa posts normais
       }
+
       process.exit(0); // sucesso
     } else {
       console.log("🚫 Tweet não enviado.");
