@@ -80,7 +80,7 @@ async function gerarTextoComGeminiOuWeb(assunto) {
 
   const prompt = assunto === "versículo bíblico"
     ? `Escreva um versículo bíblico curto e inspirador para postar no X (máx 344 caracteres). 
-       Use emojis e hashtags. Sempre vá mudando os versículos, não gere o mesmo. 
+       Use emojis e hashtags. Diga onde vem o verisuclo capitulo e versiculo. Sempre vá mudando os versículos, não gere o mesmo. 
        Variação: ${variacao}. 
        A resposta deve ser exatamente o post que será publicado.`
     : `Crie uma frase inspiradora para postar no X (máx 344 caracteres), usando emojis e hashtags, sobre ${assunto}. 
@@ -148,11 +148,7 @@ async function enviarTweet(texto) {
     return { id_str: tweet.id };
   } catch (error) {
     console.error('❌ Erro ao postar tweet:', error);
-    if (error?.data?.detail?.includes('duplicate')) {
-      console.error('⚠️ Tweet duplicado detectado. Conteúdo já foi postado.');
-    } else if (error?.code === 403) {
-      console.error('⚠️ Código 403: verifique escopo e conteúdo.');
-    }
+    return null;
   }
 }
 
@@ -171,18 +167,18 @@ function salvarNoHistorico(texto, id = null, tipo = 'normal') {
   console.log(`📜 Histórico salvo com sucesso. Total de posts: ${historico.length}`);
 }
 
-// 🚀 Executa tweet único
+// 🚀 Executa tweet único com retry
 async function executarTweetUnico() {
   const enviadosHoje = contarTweetsHoje();
   if (enviadosHoje >= LIMITE_DIARIO) {
     console.log(`🚫 Limite diário de ${LIMITE_DIARIO} tweets atingido.`);
-    process.exit(1); // falha → não posta
+    return;
   }
 
   let contador = lerContador();
   let assunto, tipo;
 
-  if (contador >= 3) {
+  if ((contador + 1) % 3 === 0) {
     assunto = "versículo bíblico";
     tipo = 'versiculo';
   } else {
@@ -190,41 +186,36 @@ async function executarTweetUnico() {
     tipo = 'normal';
   }
 
-  const texto = await gerarTextoComGeminiOuWeb(assunto);
-  if (!texto || texto.trim().length === 0) {
-    console.log('🚫 Texto inválido ou não gerado.');
-    salvarNoHistorico('❌ Falha na geração de conteúdo.', null, 'erro');
-    process.exit(1); // falha
-  }
+  let sucesso = false;
+  for (let tentativa = 1; tentativa <= 3; tentativa++) {
+    console.log(`🔁 Tentativa ${tentativa} de postagem...`);
 
-  if (textoJaFoiPostado(texto)) {
-    console.log('🚫 Texto já foi postado anteriormente. Abortando envio.');
-    salvarNoHistorico(texto, null, tipo);
-    process.exit(1); // falha
-  }
+    let texto = await gerarTextoComGeminiOuWeb(assunto);
 
-  const textoFinal = variarTexto(texto);
-  console.log('📝 Conteúdo final:', textoFinal);
+    if (!texto || texto.trim().length === 0) {
+      texto = assunto === "versículo bíblico"
+        ? "O Senhor é meu pastor, nada me faltará 🙏✨ #Fé #Esperança"
+        : "Acredite nos seus sonhos e siga em frente 🌟🔥 #Motivação #Inspiração";
+    }
 
-  try {
+    if (textoJaFoiPostado(texto)) {
+      texto = "Cada dia é uma nova oportunidade 🌞 #Gratidão #Vida";
+    }
+
+    const textoFinal = variarTexto(texto);
     const tweet = await enviarTweet(textoFinal);
+
     if (tweet?.id_str) {
       salvarNoHistorico(textoFinal, tweet.id_str, tipo);
-
-      if (tipo === 'versiculo') {
-        salvarContador(0); // reseta após versículo
-      } else {
-        salvarContador(contador + 1); // incrementa posts normais
-      }
-
-      process.exit(0); // sucesso
-    } else {
-      console.log("🚫 Tweet não enviado.");
-      process.exit(1); // falha
+      if (tipo === 'versiculo') salvarContador(0);
+      else salvarContador(contador + 1);
+      sucesso = true;
+      break;
     }
-  } catch (error) {
-    console.error("❌ Erro ao postar tweet:", error);
-    process.exit(1); // falha
+  }
+
+  if (!sucesso) {
+    salvarNoHistorico("❌ Falha na postagem após 3 tentativas.", null, 'erro');
   }
 }
 

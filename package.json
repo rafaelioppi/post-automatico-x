@@ -1,13 +1,19 @@
 {
-    "type": "module",
-    "dependencies": {
-        "@google/generative-ai": "^0.24.1",
-        "axios": "^1.13.2",
-        "dotenv": "^17.2.3",
-        "gifencoder": "^2.0.1",
-        "node-cron": "^4.2.1",
-        "node-fetch": "^3.3.2",
-        "twitter-api-v2": "^1.27.0",
-        "twitter.js": "^0.14.0"
-    }
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2",
+    "twitter-api-v2": "^1.27.0"
+  },
+  "name": "post-automatico-x",
+  "description": "Este projeto automatiza a geração e publicação de tweets usando a API do Gemini (Google) e a API do X (Twitter), com agendamento diário via GitHub Actions. Ideal para perfis que desejam manter uma presença ativa com conteúdo criativo e positivo sobre tecnologia e inovação.",
+  "version": "1.0.0",
+  "main": "gerarPost.js",
+  "scripts": {
+    "start": "node gerarPost.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
