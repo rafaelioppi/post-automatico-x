@@ -27,7 +27,6 @@ const assuntos = [
   'inovação', 'carreira', 'desenvolvimento pessoal'
 ];
 
-// Prefixos dinâmicos para variar o começo do prompt
 const prefixos = [
   "Fale sobre",
   "Faça um resumo sobre",
@@ -123,29 +122,18 @@ function esperar(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// 🤖 Gera texto com Gemini (dinâmico e sempre diferente)
+// 🤖 Gera texto com Gemini
 async function gerarTextoComGeminiOuWeb(assunto) {
   const variacao = Math.floor(Math.random() * 10000);
   const prefixo = selecionarPrefixo();
 
   const prompt = assunto === "versículo bíblico"
-    ? `${prefixo} um versículo bíblico curto e inspirador para postar no X (máx 344 caracteres). O post deve ter o máximo possível de caracteres.
-       Use emojis e hashtags. Cite o livro, capítulo e versículo.
-       Sempre escolha versículos diferentes, não repita anteriores.
-       Adicione uma nuance criativa (ex.: metáfora, chamada à ação).
-       Variação: ${variacao}.
-       A resposta deve ser exatamente o post que será publicado.`
-    : `${prefixo} ${assunto} para postar no X (máx 344 caracteres). O post deve ter o máximo possível de caracteres.
-       Use emojis e hashtags.
-       Sempre gere frases diferentes, não repita anteriores.
-       Adicione uma nuance criativa (ex.: metáfora, pergunta retórica, chamada à ação).
-       Variação: ${variacao}.
-       A resposta deve ser exatamente o post que será publicado.`;
+    ? `${prefixo} um versículo bíblico curto e inspirador para postar no X (máx 280 caracteres).`
+    : `${prefixo} ${assunto} para postar no X (máx 280 caracteres).`;
 
   return await gerarTextoComGemini(prompt);
 }
 
-// 🤖 Gera texto com Gemini com tratamento de erro + seed aleatória
 async function gerarTextoComGemini(prompt, tentativas = 3) {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
   const seed = Math.floor(Math.random() * 1000000);
@@ -169,19 +157,12 @@ async function gerarTextoComGemini(prompt, tentativas = 3) {
       });
 
       const result = await response.json();
-
-      if (result?.error?.message?.includes('Quota exceeded') || result?.error?.message?.includes('overloaded')) {
-        console.error(`❌ Erro ao gerar texto com Gemini: ${result.error.message}`);
-        await esperar(5000);
-        continue;
-      }
-
       let texto = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
       if (!texto) return null;
 
       texto = texto.replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
-      if (texto.length > 344) {
-        texto = texto.slice(0, 341) + '…';
+      if (texto.length > 280) {
+        texto = texto.slice(0, 277) + '…';
       }
 
       return texto.trim();
@@ -194,16 +175,20 @@ async function gerarTextoComGemini(prompt, tentativas = 3) {
   return null;
 }
 
-// 🐦 Envia tweet
-async function enviarTweet(texto) {
-  try {
-    const { data: tweet } = await twitter.v2.tweet(texto);
-    console.log('✅ Tweet enviado:', tweet.id);
-    return { id_str: tweet.id };
-  } catch (error) {
-    console.error('❌ Erro ao postar tweet:', error);
-    return null;
+// 🐦 Envia tweet com retry e backoff
+async function enviarTweetComRetry(texto, maxTentativas = 3) {
+  for (let i = 0; i < maxTentativas; i++) {
+    try {
+      const { data: tweet } = await twitter.v2.tweet(texto);
+      console.log('✅ Tweet enviado:', tweet.id);
+      return { id_str: tweet.id };
+    } catch (error) {
+      console.error(`❌ Tentativa ${i+1} falhou:`, error?.data || error);
+      const espera = Math.pow(2, i) * 1000; // 1s, 2s, 4s...
+      await esperar(espera);
+    }
   }
+  return null;
 }
 
 // 🗂️ Salva histórico
@@ -221,7 +206,7 @@ function salvarNoHistorico(texto, id = null, tipo = 'normal') {
   console.log(`📜 Histórico salvo com sucesso. Total de posts: ${historico.length}`);
 }
 
-// 🚀 Executa tweet único com retry e checagem de similaridade
+// 🚀 Executa tweet único
 async function executarTweetUnico() {
   const enviadosHoje = contarTweetsHoje();
   if (enviadosHoje >= LIMITE_DIARIO) {
@@ -256,8 +241,8 @@ async function executarTweetUnico() {
       texto = "Cada dia é uma nova oportunidade 🌞 #Gratidão #Vida";
     }
 
-    const textoFinal = variarTexto(texto);
-    const tweet = await enviarTweet(textoFinal);
+        const textoFinal = variarTexto(texto);
+    const tweet = await enviarTweetComRetry(textoFinal);
 
     if (tweet?.id_str) {
       salvarNoHistorico(textoFinal, tweet.id_str, tipo);

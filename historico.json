@@ -386,5 +386,23 @@
     "id": "1990394594970755355",
     "data": "2025-11-17T12:20:25.951Z",
     "tipo": "normal"
+  },
+  {
+    "texto": "❌ Falha na postagem após 3 tentativas.",
+    "id": null,
+    "data": "2025-11-18T13:01:59.626Z",
+    "tipo": "erro"
+  },
+  {
+    "texto": "❌ Falha na postagem após 3 tentativas.",
+    "id": null,
+    "data": "2025-11-18T13:02:51.857Z",
+    "tipo": "erro"
+  },
+  {
+    "texto": "❌ Falha na postagem após 3 tentativas.",
+    "id": null,
+    "data": "2025-11-18T13:06:47.890Z",
+    "tipo": "erro"
   }
 ]

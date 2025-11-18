@@ -1,3 +1,4 @@
+
 name: Postar 17 tweets por dia
 
 on:
@@ -39,7 +40,7 @@ jobs:
       - name: 📦 Instalar dependências
         run: npm install
 
-      - name: 🚀 Executar script de postagem
+      - name: 🚀 Executar script de postagem (com mais tentativas)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
@@ -47,5 +48,11 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
         run: |
-          # não aborta em erro, garante execução
-          node gerarPost.js || echo "⚠️ Falha ao postar, mas workflow continua"
+          # tenta rodar até 6 vezes (dobro das 3 originais)
+          for i in {1..6}; do
+            echo "🔁 Tentativa $i de postagem..."
+            node gerarPost.js && break || echo "⚠️ Falha na tentativa $i"
+            sleep 10
+          done
+
+          
