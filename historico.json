@@ -404,5 +404,11 @@
     "id": null,
     "data": "2025-11-18T13:06:47.890Z",
     "tipo": "erro"
+  },
+  {
+    "texto": "❌ Falha na postagem após 3 tentativas.",
+    "id": null,
+    "data": "2025-11-18T13:08:46.736Z",
+    "tipo": "erro"
   }
 ]
