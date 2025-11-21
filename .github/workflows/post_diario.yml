@@ -1,4 +1,3 @@
-
 name: Postar 17 tweets por dia
 
 on:
@@ -40,7 +39,7 @@ jobs:
       - name: 📦 Instalar dependências
         run: npm install
 
-           - name: 🚀 Executar script de postagem (com mais tentativas)
+      - name: 🚀 Executar script de postagem (com mais tentativas)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
