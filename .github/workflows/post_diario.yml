@@ -40,7 +40,7 @@ jobs:
       - name: 📦 Instalar dependências
         run: npm install
 
-      - name: 🚀 Executar script de postagem (com mais tentativas)
+           - name: 🚀 Executar script de postagem (com mais tentativas)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
@@ -48,11 +48,9 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
         run: |
-          # tenta rodar até 6 vezes (dobro das 3 originais)
-          for i in {1..6}; do
+          # tenta rodar até 18 vezes (triplo das 6 originais)
+          for i in {1..18}; do
             echo "🔁 Tentativa $i de postagem..."
             node gerarPost.js && break || echo "⚠️ Falha na tentativa $i"
             sleep 10
           done
-
-          
